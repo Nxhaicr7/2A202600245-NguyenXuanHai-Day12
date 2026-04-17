@@ -39,22 +39,22 @@
 
 ### Exercise 4.1-4.3: Test results
 ```bash
-# Lệnh kiểm tra xác thực không thành công
+# Lệnh kiểm tra xác thực không thành công (thiếu API Key)
 curl -X POST http://localhost:8000/ask -H "Content-Type: application/json" -d '{"question": "Hello"}'
-# Output mong muốn: 403 Forbidden hoặc 401 Unauthorized do thiếu API Key
+# Output: {"detail":"Invalid or missing API key. Include header: X-API-Key: <key>"}
 
-# Lệnh kiểm tra xác thực thành công
-curl -X POST http://localhost:8000/ask -H "X-API-Key: my-secret-key" -H "Content-Type: application/json" -d '{"question": "Hello"}'
-# Output mong muốn: 200 OK
+# Lệnh kiểm tra xác thực thành công (có API Key)
+curl -X POST http://localhost:8000/ask -H "X-API-Key: dev-key-change-me-in-production" -H "Content-Type: application/json" -d '{"user_id": "test", "question": "Hỏi về dịch vụ gửi tiết kiệm"}'
+# Output: {"question":"Hỏi về dịch vụ gửi tiết kiệm","answer":"...","model":"mock_llm",...}
 ```
 
 ### Exercise 4.4: Cost guard implementation
-Sử dụng class `CostGuard` lưu trạng thái (in-memory hoặc Redis trong production) với các cấu hình `daily_budget_usd`, `global_daily_budget_usd`. Guardrail này theo dõi lượng token in/out sau mỗi request. Nếu chi phí vượt mức ngân sách (global hoặc per-user), raise lỗi `HTTPException 503` hoặc `402`. Thêm logic cảnh báo (warning logging) khi chi phí đạt mức threshold như 80%.
+Sử dụng class `CostGuard` lưu trạng thái trong Redis (stateless). Class này theo dõi lượng token tiêu thụ dựa trên giá của model (vd: GPT-4o-mini). Nếu `total_cost_usd` vượt quá `daily_budget_usd` của user hoặc `global_daily_budget_usd` của hệ thống, agent sẽ chặn request và trả về lỗi `402 Payment Required` hoặc `503 Service Unavailable`.
 
 ## Part 5: Scaling & Reliability
 
 ### Exercise 5.1-5.5: Implementation notes
-- **Health/Readiness probes**: Thiết lập các endpoint `/health` (liveness) và `/ready` (kiểm tra các dependent service như Redis).
-- **Graceful Shutdown**: Handle `SIGTERM` signal để đợi các requests hiện tại xử lý xong.
-- **Stateless design**: Sử dụng Redis để quản lý session và lịch sử hội thoại thay vì in-memory.
-- **Load balancing**: Các requests có thể được phục vụ bởi bất kỳ instance nào (vì stateful data đã được outsource sang Redis).
+- **Health/Readiness probes**: Đã implement `/health` (liveness) và `/ready` (readiness). Endpoint `/health` trả về trạng thái uptime và kết nối Redis.
+- **Graceful Shutdown**: Sử dụng `signal.SIGTERM` handler để đảm bảo Agent hoàn thành các request đang xử lý trước khi đóng container.
+- **Stateless design**: Toàn bộ session history, rate limit data và cost tracking đều được lưu trữ trong Redis thay vì bộ nhớ cục bộ (RAM).
+- **Load balancing**: Cấu hình Docker Compose cho phép scale nhiều instances `agent` và Nginx (hoặc cloud LB) phân phối traffic đều giữa các instance.

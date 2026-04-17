@@ -6,9 +6,10 @@ ALLOWED_TOPICS = [
     "banking", "account", "transaction", "transfer",
     "loan", "interest", "savings", "credit",
     "deposit", "withdrawal", "balance", "payment",
-    "tai khoan", "giao dich", "tiet kiem", "lai suat",
-    "chuyen tien", "the tin dung", "so du", "vay",
-    "ngan hang", "atm",
+    "tai khoan", "tài khoản", "giao dich", "giao dịch", 
+    "tiet kiem", "tiết kiệm", "lai suat", "lãi suất",
+    "chuyen tien", "chuyển tiền", "the tin dung", "thẻ tín dụng", 
+    "so du", "số dư", "vay", "ngan hang", "ngân hàng", "atm",
 ]
 
 # Blocked topics
