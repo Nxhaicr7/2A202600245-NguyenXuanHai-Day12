@@ -74,14 +74,15 @@ app.add_middleware(
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
-    """Thêm security headers vào mọi response."""
-    response: Response = await call_next(request)
+    response = await call_next(request)
+    # Kiểm tra và xóa bằng từ khóa del
+    if "server" in response.headers:
+        del response.headers["server"]
+    
+    # Thêm các header bảo mật khác nếu cần
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    # Ẩn server info
-    response.headers.pop("server", None)
+    
     return response
 
 

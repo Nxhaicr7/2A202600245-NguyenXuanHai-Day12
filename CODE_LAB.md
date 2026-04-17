@@ -257,7 +257,7 @@ railway init
 4. Set environment variables:
 ```bash
 railway variables set PORT=8000
-railway variables set AGENT_API_KEY=my-secret-key
+railway variables set AGENT_API_KEY=Nxhaicr7wailwayvna
 ```
 
 5. Deploy:

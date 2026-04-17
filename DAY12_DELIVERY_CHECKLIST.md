@@ -108,7 +108,7 @@ Create a file `DEPLOYMENT.md` with your deployed service information:
 # Deployment Information
 
 ## Public URL
-https://your-agent.railway.app
+🚀 https://vinai-production-905d.up.railway.app
 
 ## Platform
 Railway / Render / Cloud Run
